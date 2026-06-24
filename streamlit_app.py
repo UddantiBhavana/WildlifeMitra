@@ -4,6 +4,27 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 import streamlit as st
 from dotenv import load_dotenv
+
+# Load .env for local development
+load_dotenv()
+
+# Robust API Key handling for Local + Cloud
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+if not GROQ_API_KEY:
+    # Fallback for Streamlit Cloud
+    try:
+        GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+    except:
+        GROQ_API_KEY = None
+
+if not GROQ_API_KEY:
+    st.error("❌ GROQ_API_KEY is missing!\n\n"
+             "→ Local: Add it to your `.env` file\n"
+             "→ Streamlit Cloud: Add it in Secrets (TOML format)")
+    st.stop()
+
+# Now import the rest
 from src.rag_setup import setup_vector_store
 from src.agents.intake_agent import get_intake_agent
 from src.agents.rag_retriever import get_rag_retriever
@@ -11,8 +32,6 @@ from src.agents.action_planner import get_action_planner
 from src.agents.prevention_agent import get_prevention_agent
 from src.agents.reflection_agent import get_reflection_agent
 from src.utils.helpers import format_sources, get_emergency_contacts
-
-load_dotenv()
 
 st.set_page_config(page_title="WildlifeMitra", page_icon="🦒", layout="wide")
 
@@ -22,7 +41,6 @@ st.markdown("""
     .main-header {font-size: 3rem; color: #1E5631; text-align: center; margin-bottom: 10px;}
     .stButton>button {background-color: #1E5631; color: white; font-weight: bold; border-radius: 8px; height: 52px;}
     .emergency-btn>button {background-color: #C62828; color: white; font-weight: bold; border-radius: 8px; height: 52px;}
-    .response-card {background-color: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 6px solid #1E5631; margin: 15px 0;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -77,7 +95,6 @@ with tab1:
                     planner = get_action_planner()
                     action_plan = planner(user_input, rag_answer)
                     
-                    # Clean Response Display
                     st.success("**Empathy & Initial Response**")
                     st.write(intake_reply)
                     
