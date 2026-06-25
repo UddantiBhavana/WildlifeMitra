@@ -5,22 +5,26 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 import streamlit as st
 from dotenv import load_dotenv
 
+# Load .env for local development
 load_dotenv()
 
-# Safe API Key Loading
+# Robust API Key handling for Local + Cloud
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 if not GROQ_API_KEY:
+    # Fallback for Streamlit Cloud
     try:
         GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
     except:
         GROQ_API_KEY = None
 
 if not GROQ_API_KEY:
-    st.error("❌ GROQ_API_KEY is missing!\n\nLocal: Check .env file\nCloud: Add in Secrets")
+    st.error("❌ GROQ_API_KEY is missing!\n\n"
+             "→ Local: Add it to your `.env` file\n"
+             "→ Streamlit Cloud: Add it in Secrets (TOML format)")
     st.stop()
 
-# Import everything AFTER API key check
+# Now import the rest
 from src.rag_setup import setup_vector_store
 from src.agents.intake_agent import get_intake_agent
 from src.agents.rag_retriever import get_rag_retriever
