@@ -9,11 +9,13 @@ import streamlit as st
 
 load_dotenv()
 
-GROQ_API_KEY = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
-
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 def get_prevention_agent():
     if not GROQ_API_KEY:
-        return lambda x, y="": "Error: API key not configured. Please check deployment."
+        # Fallback message for missing key
+        def dummy_response(user_input: str, conversation_history=""):
+            return "Error: GROQ_API_KEY is missing. Please check your .env file."
+        return dummy_response
     llm = ChatGroq(
         model="llama-3.1-8b-instant",
         temperature=0.7,
