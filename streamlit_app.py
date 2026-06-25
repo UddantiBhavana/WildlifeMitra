@@ -7,14 +7,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Force API Key from Secrets (Cloud) or .env (Local)
-GROQ_API_KEY = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
+# Safe API Key Loading
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 if not GROQ_API_KEY:
-    st.error("GROQ_API_KEY is missing. Please add it in Streamlit Secrets.")
+    try:
+        GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+    except:
+        GROQ_API_KEY = None
+
+if not GROQ_API_KEY:
+    st.error("❌ GROQ_API_KEY is missing!\n\nLocal: Check .env file\nCloud: Add in Secrets")
     st.stop()
 
-# Import after key is confirmed
+# Import everything AFTER API key check
 from src.rag_setup import setup_vector_store
 from src.agents.intake_agent import get_intake_agent
 from src.agents.rag_retriever import get_rag_retriever
@@ -25,16 +31,19 @@ from src.utils.helpers import format_sources, get_emergency_contacts
 
 st.set_page_config(page_title="WildlifeMitra", page_icon="🦒", layout="wide")
 
+# Professional Styling
 st.markdown("""
 <style>
     .main-header {font-size: 3rem; color: #1E5631; text-align: center; margin-bottom: 10px;}
     .stButton>button {background-color: #1E5631; color: white; font-weight: bold; border-radius: 8px; height: 52px;}
+    .emergency-btn>button {background-color: #C62828; color: white; font-weight: bold; border-radius: 8px; height: 52px;}
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown('<h1 class="main-header">🐘 WildlifeMitra</h1>', unsafe_allow_html=True)
 st.markdown("**Agentic RAG-Powered Human-Wildlife Conflict Mediator for Andhra Pradesh**")
 
+# Initialize
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "vector_store" not in st.session_state:
@@ -119,6 +128,7 @@ with tab3:
     st.info("**For informational purposes only.** Always contact your local Forest Department for official action.")
     st.write("**State Wildlife Helpline:** **1926**")
 
+# Conversation History
 st.divider()
 st.subheader("Conversation History")
 for msg in st.session_state.messages:
