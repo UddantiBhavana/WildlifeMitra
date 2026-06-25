@@ -9,12 +9,12 @@ import streamlit as st
 
 load_dotenv()
 
-GROQ_API_KEY = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY") or st.secrets.get("GROQ_API_KEY")
 
 def get_rag_retriever(vector_store):
     llm = ChatGroq(
         model="llama-3.1-8b-instant",
-        temperature=0.3,
+        temperature=0.7,
         groq_api_key=GROQ_API_KEY
     )
    

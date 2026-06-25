@@ -5,10 +5,9 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 import streamlit as st
 from dotenv import load_dotenv
 
-# Load .env for local development
 load_dotenv()
 
-# Robust API Key handling (Works for both Local and Streamlit Cloud)
+# Safe API Key Loading
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 if not GROQ_API_KEY:
@@ -19,11 +18,11 @@ if not GROQ_API_KEY:
 
 if not GROQ_API_KEY:
     st.error("❌ GROQ_API_KEY is missing!\n\n"
-             "→ For Local: Add it to your `.env` file\n"
-             "→ For Streamlit Cloud: Add it in Secrets (TOML format)")
+             "→ Local: Add it to your `.env` file\n"
+             "→ Streamlit Cloud: Add it in Secrets")
     st.stop()
 
-# Import project modules after API key check
+# Import everything AFTER API key is loaded
 from src.rag_setup import setup_vector_store
 from src.agents.intake_agent import get_intake_agent
 from src.agents.rag_retriever import get_rag_retriever
@@ -34,19 +33,16 @@ from src.utils.helpers import format_sources, get_emergency_contacts
 
 st.set_page_config(page_title="WildlifeMitra", page_icon="🦒", layout="wide")
 
-# Professional Styling
 st.markdown("""
 <style>
     .main-header {font-size: 3rem; color: #1E5631; text-align: center; margin-bottom: 10px;}
     .stButton>button {background-color: #1E5631; color: white; font-weight: bold; border-radius: 8px; height: 52px;}
-    .emergency-btn>button {background-color: #C62828; color: white; font-weight: bold; border-radius: 8px; height: 52px;}
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown('<h1 class="main-header">🐘 WildlifeMitra</h1>', unsafe_allow_html=True)
 st.markdown("**Agentic RAG-Powered Human-Wildlife Conflict Mediator for Andhra Pradesh**")
 
-# Initialize
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "vector_store" not in st.session_state:
@@ -131,7 +127,6 @@ with tab3:
     st.info("**For informational purposes only.** Always contact your local Forest Department for official action.")
     st.write("**State Wildlife Helpline:** **1926**")
 
-# Conversation History
 st.divider()
 st.subheader("Conversation History")
 for msg in st.session_state.messages:
