@@ -7,22 +7,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Safe API Key Loading
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+# Force API Key from Secrets (Cloud) or .env (Local)
+GROQ_API_KEY = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
 
 if not GROQ_API_KEY:
-    try:
-        GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
-    except:
-        GROQ_API_KEY = None
-
-if not GROQ_API_KEY:
-    st.error("❌ GROQ_API_KEY is missing!\n\n"
-             "→ Local: Add it to your `.env` file\n"
-             "→ Streamlit Cloud: Add it in Secrets")
+    st.error("GROQ_API_KEY is missing. Please add it in Streamlit Secrets.")
     st.stop()
 
-# Import everything AFTER API key is loaded
+# Import after key is confirmed
 from src.rag_setup import setup_vector_store
 from src.agents.intake_agent import get_intake_agent
 from src.agents.rag_retriever import get_rag_retriever
